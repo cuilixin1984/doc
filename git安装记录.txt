@@ -1,0 +1,76 @@
+生成ssh秘钥
+ssh-keygen -t rsa
+
+
+修改git端口
+vi ~/.ssh/config
+Host ipaddr
+Port 11071
+User git
+
+克隆git项目
+git clone git@139.198.4.121:/home/cuilixin/git_root/a/ip.git
+
+提交
+git add file_path
+git commit -m "message"
+git push origin master
+
+更新
+git fetch
+git pull
+
+获取最后一次更新日志
+git log -1 HEAD
+
+添加git用户公钥
+vi ~/.ssh/authorized_keys
+
+创建git server
+git init --bare ipip.git
+
+查看某文件的所有版本
+git log --pretty=oneline filepath
+
+从svn克隆版本
+git svn clone --authors-file=users.txt --no-metadata -r 0:1 svn://127.0.0.1/tiantexi
+
+获取增量版本
+git svn fetch -r 0:100 --authors-file=../users.txt
+
+查看所有分支
+git branch -a
+
+合并分支
+git merge remotes/git-svn
+
+查看分支日志
+git log remotes/git-svn
+
+批量修改commit（待测试）
+git filter-branch --msg-filter 'echo "bug ###### - \c" && cat' master..HEAD
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
