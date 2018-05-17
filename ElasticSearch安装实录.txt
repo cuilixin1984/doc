@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 ----------------------------------------------------------
 vi /etc/sysctl.conf 
 添加下面配置：
@@ -18,3 +9,16 @@ vim /etc/security/limits.conf
 在末尾追加以下内容（elk为启动用户，当然也可以指定为*）
 elk soft nofile 65536
 elk hard nofile 65536
+-----------------------------------------------------------
+启动elasticsearch :
+su cuilixin
+./bin/elasticsearch
+------------------------------------------------------------
+清空数据
+DELETE /http
+{
+  "query": {
+    "match_all": {
+    }
+  }
+}
