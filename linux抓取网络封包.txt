@@ -1,0 +1,72 @@
+读取TCP协议 5060端口的网络包，-X 用16进制显示结果， -s 0 表示显示全部包头信息
+tcpdump 'port 5060 and tcp' -X -s 0
+
+-------------------------------------------------------------------------------------
+
+返回内容
+第一次握手，bogon表示本地虚拟地址，dslb-ip是目标地址, [S]表示SYN，seq是本机发给服务器的ack编码
+15:22:26.640384 IP bogon.45578 > dslb-188-107-218-085.188.107.pools.vodafone-ip.de.sip: Flags [S], seq 2200675919, win 29200, options [mss 1460,sackOK,TS val 3701764112 ecr 0,nop,wscale 7], length 0
+	0x0000:  4510 003c d65f 4000 4006 0be5 c0a8 00fe  E..<._@.@.......
+	0x0010:  bc6b da55 b20a 13c4 832b a64f 0000 0000  .k.U.....+.O....
+	0x0020:  a002 7210 5896 0000 0204 05b4 0402 080a  ..r.X...........
+	0x0030:  dca4 7010 0000 0000 0103 0307            ..p.........
+第二次握手，服务器向本地发送信息， seq是服务器的通信编码，ack是上一次握手本地发给服务器的编码加一
+15:22:27.129504 IP dslb-188-107-218-085.188.107.pools.vodafone-ip.de.sip > bogon.45578: Flags [S.], seq 2148839979, ack 2200675920, win 14480, options [mss 1360,sackOK,TS val 2373078588 ecr 3701764112,nop,wscale 4], length 0
+	0x0000:  4500 003c 0000 4000 2706 fb54 bc6b da55  E..<..@.'..T.k.U
+	0x0010:  c0a8 00fe 13c4 b20a 8014 b22b 832b a650  ...........+.+.P
+	0x0020:  a012 3890 6d70 0000 0204 0550 0402 080a  ..8.mp.....P....
+	0x0030:  8d72 4e3c dca4 7010 0103 0304            .rN<..p.....
+第三次握手，本地向服务器发送ack 1，表示收到服务器反馈，握手成功
+15:22:27.129567 IP bogon.45578 > dslb-188-107-218-085.188.107.pools.vodafone-ip.de.sip: Flags [.], ack 1, win 229, options [nop,nop,TS val 3701764602 ecr 2373078588], length 0
+	0x0000:  4510 0034 d660 4000 4006 0bec c0a8 00fe  E..4.`@.@.......
+	0x0010:  bc6b da55 b20a 13c4 832b a650 8014 b22c  .k.U.....+.P...,
+	0x0020:  8010 00e5 588e 0000 0101 080a dca4 71fa  ....X.........q.
+	0x0030:  8d72 4e3c                                .rN<
+开始通信，本地客户端向服务器发送内容
+15:22:33.369830 IP bogon.45578 > dslb-188-107-218-085.188.107.pools.vodafone-ip.de.sip: Flags [P.], seq 1:10, ack 1, win 229, options [nop,nop,TS val 3701770842 ecr 2373078588], length 9
+	0x0000:  4510 003d d661 4000 4006 0be2 c0a8 00fe  E..=.a@.@.......
+	0x0010:  bc6b da55 b20a 13c4 832b a650 8014 b22c  .k.U.....+.P...,
+	0x0020:  8018 00e5 5897 0000 0101 080a dca4 8a5a  ....X..........Z
+	0x0030:  8d72 4e3c 6765 7420 7370 690d 0a         .rN<get.spi..
+
+----------------------------------------------------------------------------------------------------------
+
+用GO语言实现连接端口，并接受端口返回的信息，TCP协议
+package main
+
+import (
+	"fmt"
+	"net"
+	"time"
+)
+
+func main() {
+	ip := `188.107.218.85:5060`
+	conn, err := net.DialTimeout("tcp", ip, time.Second*10)
+	if err != nil {
+		fmt.Println("conn error:", err.Error())
+	} else {
+		fmt.Println(conn)
+	}
+	defer conn.Close()
+
+	num, write_err := conn.Write([]byte("get spi\n"))
+	if write_err != nil {
+		fmt.Println(write_err.Error())
+	}
+	fmt.Println(num)
+
+
+	for {
+		var buf [4096]byte
+		num, err = conn.Read(buf[0:])
+		if err != nil {
+			fmt.Println("read err:", err.Error())
+		} else {
+			fmt.Println("message len:", num)
+			fmt.Println("message:", string(buf[0:num]))
+		}
+	}
+
+	fmt.Println("finish.")
+}

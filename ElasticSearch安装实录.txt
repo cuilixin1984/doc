@@ -7,11 +7,15 @@ sysctl -p
 ----------------------------------------------------------
 vim /etc/security/limits.conf
 在末尾追加以下内容（elk为启动用户，当然也可以指定为*）
-elk soft nofile 65536
-elk hard nofile 65536
+elk soft nofile 655360
+elk hard nofile 655360
 -----------------------------------------------------------
 启动elasticsearch :
-su cuilixin
+
+sudo useradd elsearch 
+chown -R elsearch:elsearch /usr/local/elasticsearch-2.4.1  
+
+su elsearch 
 ./bin/elasticsearch
 ------------------------------------------------------------
 清空数据
